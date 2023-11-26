@@ -4,6 +4,27 @@ import helper
 class IsingModel:
 
     def __init__(self, L, T, J=1, option="metropolis"):
+        """
+        Class representing the Ising model for a given lattice size, temperatue, and
+        interaction term, with an option to update the spin configuration using either
+        the Metropolis of cluster algorithms.
+
+        Parameters
+        ----------
+        L : int
+            System size.
+
+        T : float
+            System temperature.
+
+        J : float
+            Nearest neighbor interaction constant.
+
+        option : string
+            Update system in a Monte Carlo step using either the metropolis or cluster
+            algorithms
+        
+        """
         self.L = L      # Lattice size
         self.T = T*J    # Temperature (in units of J)
         self.J = J      # Neighbor interaction strength
@@ -14,6 +35,12 @@ class IsingModel:
         self.state = self._get_initial_state()
 
     def _set_option(self, option):
+        """
+        Sets the MC option to either metropolis or cluster
+
+        NOTE: the clustering option still needs to be implemented
+
+        """
         option = option.lower()
 
         if option not in ["metropolis", "cluster"]:
@@ -30,22 +57,15 @@ class IsingModel:
 
     @property
     def total_spins(self):
+        """
+        Returns the total number of spins N = L*L.
+        """
         return (self.L)**2
 
     @property
     def energy(self):
         """
-        Calculates energy from H = -J * Sum_{nn} S_i S_j. 
-        
-        This goes through every spin (double starred) and sums its nearest neighbors (starred),
-        then the contribution to the energy is the (**) spin times the nearest neighbor sum.
-
-        [[ 1,    1*,  -1,  -1]
-         [-1*,  1**,   1*, -1]
-         [ 1,   -1*,  -1,   1]
-         [ 1,    1,   -1,  -1]]
-
-        Doing this overcounts the nearest neighbor sum by 4, so we divide by 1/4. 
+        Returns the total energy for the current spin configuration.
         """
         return helper.energy(self.state, self.L, self.J)
 
@@ -59,6 +79,17 @@ class IsingModel:
         return np.abs(np.sum(self.state))/self.total_spins
     
     def mc_step(self):
+        """
+        Performs a Monte Carlo (MC) step. 
+
+        If option is to 'metropolis', the metropolis algorithm is used. Otherwise,
+        the cluster algorithm is used (this is useful when we are closer to the
+        critical temperatue, and flipping individual spins becomes probabilistically
+        unfavorable). 
+
+        NOTE: the cluster option still needs to be implemented
+
+        """
         if self.option == "metropolis":
             helper.mc_step_metropolis(self.state, self.L, self.T, self.J, self.total_spins)
 
