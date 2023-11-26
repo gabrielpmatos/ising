@@ -36,9 +36,9 @@ class IsingModel:
 
     def _set_option(self, option):
         """
-        Sets the MC option to either metropolis or cluster
+        Sets the MC option to either metropolis or cluster.
 
-        NOTE: the clustering option still needs to be implemented
+        NOTE: the clustering option still needs to be implemented.
 
         """
         option = option.lower()
@@ -87,7 +87,7 @@ class IsingModel:
         critical temperatue, and flipping individual spins becomes probabilistically
         unfavorable). 
 
-        NOTE: the cluster option still needs to be implemented
+        NOTE: the cluster option still needs to be implemented.
 
         """
         if self.option == "metropolis":

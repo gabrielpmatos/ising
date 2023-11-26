@@ -63,28 +63,20 @@ def simulate(L, T, thermalize_sweeps, msmt_sweeps, msmt_rate, verbose=False):
     print(f"Done measurements for L = {L}, T = {T}\n")
     return energy/n_msmts, energy_sq/n_msmts, magnetization/n_msmts, magnetization_sq/n_msmts
 
-def save(values, variable, L=None):
+def save(results, L):
     """
     Saves simulation results to .npy files.
 
     Parameters
     ----------
-    values : list or np.ndarray
-        Values to be saved.
+    results : np.ndarray
+        Values to be saved. This is a structured array.
     
-    variable : string
-        Name of variable to be saved.
-
     L : int
-        Size of simulated system, used in the file name. If 'None' (as in 
-        the case of saving the temperature array), the system size won't 
-        be included in the file name.
+        Size of simulated system, used in the file name.
     
     """
-    if L: 
-        with open(data_path + f"ising_2d_L_{L}_{variable}.npy", "wb") as f: np.save(f, values)
-    else: 
-        with open(data_path + f"ising_2d_{variable}.npy", "wb") as f: np.save(f, values) 
+    with open(data_path + f"ising_2d_L_{L}.npy", "wb") as f: np.save(f, results) 
 
 #-----------------------------------------------------------------------------
 def main():
@@ -96,14 +88,18 @@ def main():
 
     # System parameters
     sizes = [10, 16, 24, 36]
-    temperatures = np.arange(0.015, 4.5, 0.015) 
+    temperatures = np.arange(0.015, 4.5, 0.3) 
     k = 1 # Setting Boltzmann constant to 1
 
-    for L in sizes:
-        N = L**2
-        E, M, C, Chi = [], [], [], []
+    # Data type definitions for structured array of results
+    results_dtype = [("E", float), ("M", float), ("C", float), ("Chi", float), ("T", float)]
 
-        for T in temperatures:
+    for L in sizes:
+        N = L**2 
+        E, M, C, Chi = [], [], [], []                                # Defines lists to store results
+        results = np.empty(temperatures.size, dtype=results_dtype)   # Defines structured array to save
+
+        for i, T in enumerate(temperatures):
             energy, energy_sq, magnetization, magnetization_sq = simulate(L, T, thermalize_sweeps, msmt_sweeps, msmt_rate)
 
             E.append(energy)
@@ -112,10 +108,10 @@ def main():
             Chi.append((N/(k*T))*(magnetization_sq - magnetization**2))
 
         # Saves simulation results for analysis
-        for values, variable in zip([E, M, C, Chi], ["E", "M", "C", "Chi"]): save(values, variable, L)
-
-    # Saves array of temperature values
-    save(temperatures, "T")
+        for values, variable in zip([E, M, C, Chi, temperatures], ["E", "M", "C", "Chi", "T"]):
+            results[variable] = np.asarray(values, dtype=float) # Convert to np array before saving
+        
+        save(results, L)
 
 if __name__ == "__main__":
     main()

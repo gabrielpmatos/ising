@@ -5,6 +5,7 @@ import time
 def timer(function):
     """
     Helper function to calculate total run time of functions.
+    See: https://stackoverflow.com/a/63104367
     """
     def wrapper(*args, **kwargs):
         function_name = function.__name__
