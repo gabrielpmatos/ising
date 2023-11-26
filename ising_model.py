@@ -1,45 +1,26 @@
 import numpy as np
-from numba import njit
-import time
-
-def timer(func):
-    def wrapper(*args, **kwargs):
-        func_name = func.__name__
-        print(f"Starting {func_name}")
-        
-        t1 = time.perf_counter()
-        output = func(*args, **kwargs)
-        t2 = time.perf_counter()
-        
-        print(f"Total time for {func_name}: {t2 - t1:.3f} s\n")
-        return output
-    
-    return wrapper
-
-@njit
-def _energy(state, L, J):
-    """
-    Actually does the energy calculation here. The njit decorator pre-compiles the 
-    Python code so that the loops run basically at C speed.
-    """
-    energy = 0
-
-    for i in range(L):
-        for j in range(L):
-            s = state[i,j]
-            nn_sum = state[(i+1)%L, j] + state[i,(j+1)%L] + state[(i-1)%L, j] + state[i,(j-1)%L]
-            energy += s *nn_sum
-
-    return -J*(energy/4)
+import helper
 
 class IsingModel:
 
-    def __init__(self, L, T, J=1):
+    def __init__(self, L, T, J=1, option="metropolis"):
         self.L = L      # Lattice size
-        self.T = T      # Temperature
+        self.T = T*J    # Temperature (in units of J)
         self.J = J      # Neighbor interaction strength
 
+        # Do MC step either w/ metropolis or cluster algorithms
+        self.option = self._set_option(option)
+
         self.state = self._get_initial_state()
+
+    def _set_option(self, option):
+        option = option.lower()
+
+        if option not in ["metropolis", "cluster"]:
+            print(f"MC step option {option} not supported, defaulting to metropolis algorithm...")
+            return "metropolis"
+        
+        else: return option
 
     def _get_initial_state(self):
         """
@@ -52,7 +33,6 @@ class IsingModel:
         return (self.L)**2
 
     @property
-    @timer
     def energy(self):
         """
         Calculates energy from H = -J * Sum_{nn} S_i S_j. 
@@ -67,12 +47,21 @@ class IsingModel:
 
         Doing this overcounts the nearest neighbor sum by 4, so we divide by 1/4. 
         """
-        return _energy(self.state, self.L, self.J)
+        return helper.energy(self.state, self.L, self.J)
 
     @property
     def magnetization(self):
-        ...
+        """
+        Caclulates M = <S_i> = |Sum_{i} S_i| / N.
 
-if __name__ == "__main__":
-    ising = IsingModel(10, 2)
-    print(ising.state)
+        Here 'i' goes through the entire lattice, and N is the total number of spins.
+        """
+        return np.abs(np.sum(self.state))/self.total_spins
+    
+    def mc_step(self):
+        if self.option == "metropolis":
+            helper.mc_step_metropolis(self.state, self.L, self.T, self.J, self.total_spins)
+
+        else:
+            print("Come back later!")
+            return
