@@ -88,7 +88,7 @@ def main():
 
     # System parameters
     sizes = [10, 16, 24, 36]
-    temperatures = np.arange(0.015, 4.5, 0.3) 
+    temperatures = np.arange(0.015, 4.5, 0.015) 
     k = 1 # Setting Boltzmann constant to 1
 
     # Data type definitions for structured array of results
