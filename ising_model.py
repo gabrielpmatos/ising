@@ -1,7 +1,6 @@
 import numpy as np
-import scipy
-import time
 from numba import njit
+import time
 
 def timer(func):
     def wrapper(*args, **kwargs):
@@ -20,8 +19,8 @@ def timer(func):
 @njit
 def _energy(state, L, J):
     """
-    Does the same calculation as in IsingModel.v_energy, but here njit pre-compiles
-    the Python code so that the loops runs basically at C speed.
+    Actually does the energy calculation here. The njit decorator pre-compiles the 
+    Python code so that the loops run basically at C speed.
     """
     energy = 0
 
@@ -36,10 +35,9 @@ def _energy(state, L, J):
 class IsingModel:
 
     def __init__(self, L, T, J=1):
-        self.L = L                                              # Lattice size
-        self.T = T                                              # Temperature
-        self.J = J                                              # Neighbor interaction strength
-        self._nn = np.array([[0, 1, 0], [1, 0, 1], [0, 1, 0]])  # Nearest neighbor structure 
+        self.L = L      # Lattice size
+        self.T = T      # Temperature
+        self.J = J      # Neighbor interaction strength
 
         self.state = self._get_initial_state()
 
@@ -52,28 +50,6 @@ class IsingModel:
     @property
     def total_spins(self):
         return (self.L)**2
-
-    @property
-    @timer
-    def v_energy(self):
-        """
-        Vectorized energy calculation.
-
-        Calculates energy from H = -J * Sum_{nn} S_i S_j. This is done in this funny way
-        to make sure that things are vectorized and fast. See this stack overflow post:
-        https://stackoverflow.com/a/35925698
-
-        This goes through every spin (double starred) and sums its nearest neighbors (starred),
-        then the contribution to the energy is the (**) spin times the nearest neighbor sum.
-
-        [[ 1,    1*,  -1,  -1]
-         [-1*,  1**,   1*, -1]
-         [ 1,   -1*,  -1,   1]
-         [ 1,    1,   -1,  -1]]
-
-        Doing this overcounts the nearest neighbor sum by 4, so we divide by 1/4.
-        """
-        return - (1/4) * self.J * np.sum(self.state * scipy.ndimage.convolve(self.state, self._nn, mode="wrap"))
 
     @property
     @timer
@@ -98,8 +74,5 @@ class IsingModel:
         ...
 
 if __name__ == "__main__":
-    ising = IsingModel(10000, 2)
+    ising = IsingModel(10, 2)
     print(ising.state)
-    print(ising.dummy_energy)
-    print(ising.dummy_energy)
-    print(ising.energy)
