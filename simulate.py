@@ -11,12 +11,6 @@ def simulate(thermalize_sweeps, msmt_sweeps, msmt_rate, L, T, verbose=False):
 
     Parameters
     ----------
-    L : int
-        System size to simulate.
-
-    T : float
-        Temperature to simulate.
-
     thermalize_sweeps : int
         Number of sweeps to thermalize system.
 
@@ -26,6 +20,12 @@ def simulate(thermalize_sweeps, msmt_sweeps, msmt_rate, L, T, verbose=False):
     msmt_rate : int
         Rate at which measurements are made. I.e. if 10, a measurement is made
         every 10 measurement sweeps.
+
+    L : int
+        System size to simulate.
+
+    T : float
+        Temperature to simulate.
 
     verbose : bool
         If 'True', turns on printouts for steps in sweep.
@@ -105,7 +105,7 @@ def main():
 
     # System parameters
     sizes = [10, 16, 24, 36]
-    T = np.arange(0.015, 4.5, 0.5) 
+    T = np.arange(0.015, 4.5, 0.015) 
     k = 1 # Setting Boltzmann constant to 1
 
     print("Parameters")
