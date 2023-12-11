@@ -68,7 +68,8 @@ def energy(state, L, J):
             nn_sum = state[(i+1)%L, j] + state[i,(j+1)%L] + state[(i-1)%L, j] + state[i,(j-1)%L]
             energy += s *nn_sum
 
-    return -J*(energy/4)
+    # We overcount the links by 2
+    return -J*(energy/2)
 
 @njit
 def mc_step_metropolis(state, L, T, J, N):
@@ -116,5 +117,3 @@ def mc_step_metropolis(state, L, T, J, N):
 
         if cost < 0: state[a, b] = -s
         elif np.random.rand() <= np.exp(-cost*(1/T)): state[a, b] = -s
-
-    return state
