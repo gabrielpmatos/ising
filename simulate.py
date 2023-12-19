@@ -116,6 +116,7 @@ def main():
     print(f"System sizes          = {sizes}")
     print(f"Temperature range     = ({T.min()}, {T.max()}, {T.size})")
     print(f"Boltzmann constant    = {k}")
+    print(f"Number of CPUs        = {cpu_count()}")
     print("")
 
     # Data type definitions for structured array of results

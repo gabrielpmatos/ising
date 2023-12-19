@@ -36,12 +36,14 @@ class Plotter:
             try: 
                 with open(data_path + f'ising_2d_L_{L}.npy', 'rb') as f:
                     results[L] = np.load(f)
+                    results[L]["E"] = results[L]["E"]/L # So we can measure E per spin
 
                 sizes.append(L)
 
             except FileNotFoundError:
                 print(f"No results available for L = {L}, skipping...")
                 continue
+
 
         return sizes, results 
 
@@ -54,7 +56,8 @@ class Plotter:
                 T = self.results[L]["T"]
                 X = self.results[L][variable]
 
-                ax.scatter(T, X, marker=self.markers[i], color=self.colors[i], s=self.marker_size, label=f"L = {L}")
+                ax.plot(T, X, linestyle="--", color=self.colors[i], label=f"L = {L}")
+                #ax.scatter(T, X, marker=self.markers[i], color=self.colors[i], s=self.marker_size, label=f"L = {L}")
             
             ax.set(xlabel="Temperature [J]", ylabel=label)
             ax.grid()
